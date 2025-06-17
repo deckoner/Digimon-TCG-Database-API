@@ -24,6 +24,13 @@ This config is used to connect the API to your MySQL database.
 
 ---
 
+## ▶️ How to run the API
+Once the environment is configured, you can launch the API using:
+```bash
+uvicorn main:app --reload
+```
+---
+
 ## 🧪 Example endpoints
 Here are some of the available routes:
 - `GET /collection/` — Get paginated user collection  
