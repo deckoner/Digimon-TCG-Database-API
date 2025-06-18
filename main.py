@@ -1,8 +1,9 @@
 import os
 import uvicorn
 from dotenv import load_dotenv
-from fastapi import FastAPI, Query, HTTPException, Depends, status
+from fastapi import FastAPI, Query, HTTPException, Depends, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from starlette.middleware.base import BaseHTTPMiddleware
 from typing import Optional
 from sql import (
     get_all_cards,
@@ -57,6 +58,23 @@ app = FastAPI(
         {"name": "Decks", "description": "Endpoints for managing card decks"},
     ],
 )
+
+
+# Define the middleware
+class CacheControlMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+
+        # Add cache headers for paths starting with /aux/ or /cards/
+        if request.url.path.startswith("/aux/") or request.url.path.startswith("/cards/"):
+            response.headers["Cache-Control"] = "public, max-age=3600"
+
+        return response
+
+
+# Add middleware to the app
+app.add_middleware(CacheControlMiddleware)
+
 
 # Security configuration
 API_KEY = os.getenv("API_KEY")
