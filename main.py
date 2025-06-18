@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, Query, HTTPException, Depends, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import Response
 from typing import Optional
 from sql import (
     get_all_cards,
@@ -63,10 +64,23 @@ app = FastAPI(
 # Define the middleware
 class CacheControlMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        response = await call_next(request)
+        response: Response = await call_next(request)
 
-        # Add cache headers for paths starting with /aux/ or /cards/
-        if request.url.path.startswith("/aux/") or request.url.path.startswith("/cards/"):
+        # Prevent error caching (status >= 400)
+        if response.status_code >= 400:
+            return response
+
+        path = request.url.path
+
+        # Routes that should not be patted down
+        no_cache_prefixes = ["/decks", "/collections"]
+
+        if any(path.startswith(prefix) for prefix in no_cache_prefixes):
+            # We do not add cache header
+            return response
+
+        # Routes that can be cached
+        if path.startswith("/aux/") or path.startswith("/cards/"):
             response.headers["Cache-Control"] = "public, max-age=3600"
 
         return response
