@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+python-dotenv
+mysql-connector-python
+pytest
+pytest-asyncio
+httpx
+pytest-order

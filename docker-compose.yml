@@ -1,0 +1,13 @@
+services:
+  digimon-api:
+    build: .
+    container_name: digimon-api
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_HOST=ip de la base de datos
+      - DB_USER=nombre de usuario
+      - DB_PASSWORD=contraseña
+      - DB_NAME=nombre de la base de datos
+      - API_KEY=key
+    restart: unless-stopped
